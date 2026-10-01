@@ -169,7 +169,7 @@
     function stopMatch() {
         if(confirm("Stop match? This pauses the clock permanently. Export stats before resetting!")) {
             matchActive = false; clearInterval(clockInterval);
-            const btn = document.getElementById('btn-start'); btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; logEvent resurrect = false; logEvent(`--- MATCH STOPPED PERMANENTLY at ${formatTime(matchSeconds)} ---`);
+            const btn = document.getElementById('btn-start'); btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; logEvent(`--- MATCH STOPPED PERMANENTLY at ${formatTime(matchSeconds)} ---`);
         }
     }
     function formatTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
