@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U11 9v9 Soccer Lineup Manager (3-4-1)</title>
+    <style>
+        :root {
+            --pitch-green: #2e7d32;
+            --pitch-lines: #ffffff;
+            --player-bg: #1565c0;
+            --bench-bg: #ef6c00;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+            margin: 5px 0 15px 0;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        button.stop { background-color: #dc3545; }
+        button.stop:hover { background-color: #bd2130; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+        button.action-btn { background-color: #28a745; }
+        button.action-btn:hover { background-color: #218838; }
+        
+        /* Tactical Pitch */
+        .pitch {
+            background-color: var(--pitch-green);
+            width: 100%;
+            height: 550px;
+            border-radius: 10px;
+            position: relative;
+            border: 4px solid var(--pitch-lines);
+            box-sizing: border-box;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        /* Pitch Markings */
+        .center-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--pitch-lines);
+        }
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--pitch-lines);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .penalty-area-top {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 200px;
+            height: 80px;
+            border: 2px solid var(--pitch-lines);
+            border-top: none;
+            transform: translateX(-50%);
+        }
+        .penalty-area-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 200px;
+            height: 80px;
+            border: 2px solid var(--pitch-lines);
+            border-bottom: none;
+            transform: translateX(-50%);
+        }
+
+        /* Players on Pitch */
+        .player-slot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 85px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .jersey {
+            width: 40px;
+            height: 40px;
+            background-color: var(--player-bg);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .player-slot:hover .jersey { transform: scale(1.1); }
+        .player-slot.selected .jersey {
+            background-color: #ffeb3b;
+            color: black;
+            border-color: black;
+        }
+        .player-name {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 4px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .player-time {
+            font-size: 10px;
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px black;
+        }
+
+        /* Panels Layout */
+        .panels-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .panels-grid { grid-template-columns: 1fr; }
+            .pitch { height: 480px; }
+        }
+        .panel {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Lists and Tables */
+        .roster-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .roster-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #6c757d;
+        }
+        .roster-item.active-on-pitch { border-left-color: var(--player-bg); }
+        .roster-item.on-bench { border-left-color: var(--bench-bg); }
+        
+        .roster-item input {
+            border: 1px solid #ccc;
+            padding: 4px;
+            border-radius: 3px;
+            font-size: 14px;
+            width: 120px;
+        }
+        .roster-item .status-badge {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .status-badge.pitch-status { background: #e3f2fd; color: #0d47a1; }
+        .status-badge.bench-status { background: #fff3e0; color: #e65100; }
+
+        .log-entry {
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .log-time { font-weight: bold; color: #555; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>U11 9v9 Match Lineup Tracker</h1>
+    <h2 id="match-period">First Half</h2>
+    <h2 id="match-clock">Match Time: 00:00</h2>
+
+    <div class="controls">
+        <button id="btn-start" onclick="toggleMatch()">Start Match</button>
+        <button id="btn-period-action" class="action-btn" style="display: none;" onclick="handlePeriodTransition()">End First Half</button>
+        <button class="secondary" onclick="exportMatchLog()">Export Log & Stats</button>
+        <button class="secondary" onclick="saveRosterTemplate()">Save Template</button>
+    </div>
+
+    <!-- 3-4-1 Pitch Diagram -->
+    <div class="pitch" id="soccer-pitch">
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div class="penalty-area-top"></div>
+        <div class="penalty-area-bottom"></div>
+        
+        <!-- GK -->
+        <div class="player-slot" style="top: 90%; left: 50%;" onclick="handleSlotClick('GK')" id="slot-GK">
+            <div class="jersey">GK</div>
+            <div class="player-name" id="name-GK">Empty</div>
+            <div class="player-time" id="time-GK">0m</div>
+        </div>
+        <!-- Defense (3) -->
+        <div class="player-slot" style="top: 72%; left: 25%;" onclick="handleSlotClick('LD')" id="slot-LD">
+            <div class="jersey">LD</div>
+            <div class="player-name" id="name-LD">Empty</div>
+            <div class="player-time" id="time-LD">0m</div>
+        </div>
+        <div class="player-slot" style="top: 75%; left: 50%;" onclick="handleSlotClick('CD')" id="slot-CD">
+            <div class="jersey">CD</div>
+            <div class="player-name" id="name-CD">Empty</div>
+            <div class="player-time" id="time-CD">0m</div>
+        </div>
+        <div class="player-slot" style="top: 72%; left: 75%;" onclick="handleSlotClick('RD')" id="slot-RD">
+            <div class="jersey">RD</div>
+            <div class="player-name" id="name-RD">Empty</div>
+            <div class="player-time" id="time-RD">0m</div>
+        </div>
+        <!-- Midfield (4) -->
+        <div class="player-slot" style="top: 45%; left: 15%;" onclick="handleSlotClick('LM')" id="slot-LM">
+            <div class="jersey">LM</div>
+            <div class="player-name" id="name-LM">Empty</div>
+            <div class="player-time" id="time-LM">0m</div>
+        </div>
+        <div class="player-slot" style="top: 48%; left: 38%;" onclick="handleSlotClick('LCM')" id="slot-LCM">
+            <div class="jersey">LCM</div>
+            <div class="player-name" id="name-LCM">Empty</div>
+            <div class="player-time" id="time-LCM">0m</div>
+        </div>
+        <div class="player-slot" style="top: 48%; left: 62%;" onclick="handleSlotClick('RCM')" id="slot-RCM">
+            <div class="jersey">RCM</div>
+            <div class="player-name" id="name-RCM">Empty</div>
+            <div class="player-time" id="time-RCM">0m</div>
+        </div>
+        <div class="player-slot" style="top: 45%; left: 85%;" onclick="handleSlotClick('RM')" id="slot-RM">
+            <div class="jersey">RM</div>
+            <div class="player-name" id="name-RM">Empty</div>
+            <div class="player-time" id="time-RM">0m</div>
+        </div>
+        <!-- Forward (1) -->
