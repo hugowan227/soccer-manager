@@ -130,37 +130,35 @@
         if(saved) { try { players = JSON.parse(saved); } catch(e) { console.error(e); } }
         renderRoster(); updatePitchDisplay(); updateScoreboard();
     }
-    function updateScoreboard() { document.getElementById('live-score-text').innerText = `OURS ${teamScore} - ${opponentScore} THEM`; }
+    function updateScoreboard() { document.getElementById('live-score-text').innerText = "OURS " + teamScore + " - " + opponentScore + " THEM"; }
     
     function renderRoster() {
         const pCon = document.getElementById('pitch-roster-container'), bCon = document.getElementById('bench-roster-container');
         pCon.innerHTML = ''; bCon.innerHTML = '';
         
         const displayOrder = ['FW', 'LM', 'LCM', 'RCM', 'RM', 'LB', 'CD', 'RB', 'GK'];
-        
         let activeStarters = players.filter(x => x.position !== 'Bench').sort((a, b) => displayOrder.indexOf(a.position) - displayOrder.indexOf(b.position));
         let activeBenches = players.filter(x => x.position === 'Bench');
 
         activeStarters.forEach(p => {
             const item = document.createElement('div');
             item.className = 'roster-item active-on-pitch';
-            item.innerHTML = `<input type="text" value="${p.name}" onchange="updatePlayerName(${p.id}, this.value)"><span class="status-badge pitch-status">${p.position}</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽${p.goals} 💥${p.fouls})</span><button class="action-icon-btn btn-goal" onclick="addGoal(${p.id})">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(${p.id})">💥</button></div>`;
+            item.innerHTML = '<input type="text" value="' + p.name + '" onchange="updatePlayerName(' + p.id + ', this.value)"><span class="status-badge pitch-status">' + p.position + '</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽' + p.goals + ' 💥' + p.fouls + ')</span><button class="action-icon-btn btn-goal" onclick="addGoal(' + p.id + ')">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(' + p.id + ')">💥</button></div>';
             pCon.appendChild(item);
         });
 
         activeBenches.forEach(p => {
             const item = document.createElement('div');
             item.className = 'roster-item on-bench';
-            // Fixed: Purged the broken backslash escape character snippet from the makeSubstitution template call to restore rendering
-            item.innerHTML = `<input type="text" value="${p.name}" onchange="updatePlayerName(${p.id}, this.value)"><span class="status-badge bench-status">Sub</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽${p.goals} 💥${p.fouls})</span><button class="action-icon-btn btn-goal" onclick="addGoal(${p.id})">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(${p.id})">💥</button><button style="padding:2px 4px; font-size:11px; background:#ef6c00; margin-left:4px;" onclick="makeSubstitution(${p.id})">Swap</button></div>`;
+            item.innerHTML = '<input type="text" value="' + p.name + '" onchange="updatePlayerName(' + p.id + ', this.value)"><span class="status-badge bench-status">Sub</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽' + p.goals + ' 💥' + p.fouls + ')</span><button class="action-icon-btn btn-goal" onclick="addGoal(' + p.id + ')">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(' + p.id + ')">💥</button><button style="padding:2px 4px; font-size:11px; background:#ef6c00; margin-left:4px;" onclick="makeSubstitution(' + p.id + ')">Swap</button></div>';
             bCon.appendChild(item);
         });
     }
     
     function updatePitchDisplay() {
         ['GK', 'LB', 'CD', 'RB', 'LM', 'LCM', 'RCM', 'RM', 'FW'].forEach(pos => {
-            const p = players.find(x => x.position === pos), nEl = document.getElementById(`name-${pos}`), sEl = document.getElementById(`stats-${pos}`);
-            if(p && nEl && sEl) { nEl.innerText = p.name; sEl.innerText = `${p.minutes}m | ⚽${p.goals} 💥${p.fouls}`; }
+            const p = players.find(x => x.position === pos), nEl = document.getElementById('name-' + pos), sEl = document.getElementById('stats-' + pos);
+            if(p && nEl && sEl) { nEl.innerText = p.name; sEl.innerText = p.minutes + "m | ⚽" + p.goals + " 💥" + p.fouls; }
             else if (nEl && sEl) { nEl.innerText = "Empty"; sEl.innerText = "0m | ⚽0 💥0"; }
         });
     }
@@ -175,38 +173,38 @@
     function closeModal() { document.getElementById('pitch-action-modal').style.display = 'none'; }
     function triggerModalGoal() { if(!modalActivePosition) return; const p = players.find(x => x.position === modalActivePosition); if(p) addGoal(p.id); closeModal(); }
     function triggerModalFoul() { if(!modalActivePosition) return; const p = players.find(x => x.position === modalActivePosition); if(p) addFoul(p.id); closeModal(); }
-    function triggerModalSelectSub() { if(!modalActivePosition) return; document.querySelectorAll('.player-slot').forEach(el => el.classList.remove('selected')); selectedPitchPosition = modalActivePosition; const sel = document.getElementById(`slot-${modalActivePosition}`); if(sel) sel.classList.add('selected'); closeModal(); }
-    function addGoal(pId) { const p = players.find(x => x.id === pId); if(p) { p.goals++; teamScore++; updateScoreboard(); logEvent(`⚽ GOAL! Scored by ${p.name} (${p.position==='Bench'?'Sub':p.position}). Score: OURS ${teamScore}-${opponentScore} THEM`); renderRoster(); updatePitchDisplay(); } }
-    function addFoul(pId) { const p = players.find(x => x.id === pId); if(p) { p.fouls++; logEvent(`💥 FOUL committed by ${p.name} (${p.position==='Bench'?'Sub':p.position})`); renderRoster(); updatePitchDisplay(); } }
-    function logOpponentGoal() { opponentScore++; updateScoreboard(); logEvent(`⚠️ OPPONENT GOAL! Score: OURS ${teamScore} - ${opponentScore} THEM`); }
-    function updatePlayerName(id, newName) { const p = players.find(x => x.id === id); if(p) { const old = p.name; p.name = newName; logEvent(`Renamed ${old} to ${newName}`); updatePitchDisplay(); } }
+    function triggerModalSelectSub() { if(!modalActivePosition) return; document.querySelectorAll('.player-slot').forEach(el => el.classList.remove('selected')); selectedPitchPosition = modalActivePosition; const sel = document.getElementById('slot-' + modalActivePosition); if(sel) sel.classList.add('selected'); closeModal(); }
+    function addGoal(pId) { const p = players.find(x => x.id === pId); if(p) { p.goals++; teamScore++; updateScoreboard(); logEvent("⚽ GOAL! Scored by " + p.name + " (" + (p.position==='Bench'?'Sub':p.position) + "). Score: OURS " + teamScore + "-" + opponentScore + " THEM"); renderRoster(); updatePitchDisplay(); } }
+    function addFoul(pId) { const p = players.find(x => x.id === pId); if(p) { p.fouls++; logEvent("💥 FOUL committed by " + p.name + " (" + (p.position==='Bench'?'Sub':p.position) + ")"); renderRoster(); updatePitchDisplay(); } }
+    function logOpponentGoal() { opponentScore++; updateScoreboard(); logEvent("⚠️ OPPONENT GOAL! Score: OURS " + teamScore + " - " + opponentScore + " THEM"); }
+    function updatePlayerName(id, newName) { const p = players.find(x => x.id === id); if(p) { const old = p.name; p.name = newName; logEvent("Renamed " + old + " to " + newName); updatePitchDisplay(); } }
     function makeSubstitution(bId) {
         if(!selectedPitchPosition) { alert("Please tap a position node on the field diagram first, and click 'Select to Swap' inside the pop-up toolbar!"); return; }
         const bp = players.find(x => x.id === bId), pp = players.find(x => x.position === selectedPitchPosition), tStr = formatTime(matchSeconds);
-        if(pp) { logEvent(`[SUB] ${tStr} - ${bp.name} replaces ${pp.name} at ${selectedPitchPosition}`); pp.position = "Bench"; }
-        else { logEvent(`[SUB] ${tStr} - ${bp.name} takes empty slot at ${selectedPitchPosition}`); }
+        if(pp) { logEvent("[SUB] " + tStr + " - " + bp.name + " replaces " + pp.name + " at " + selectedPitchPosition); pp.position = "Bench"; }
+        else { logEvent("[SUB] " + tStr + " - " + bp.name + " takes empty slot at " + selectedPitchPosition); }
         bp.position = selectedPitchPosition;
-        const sel = document.getElementById(`slot-${selectedPitchPosition}`); if(sel) sel.classList.remove('selected');
+        const sel = document.getElementById('slot-' + selectedPitchPosition); if(sel) sel.classList.remove('selected');
         selectedPitchPosition = null; renderRoster(); updatePitchDisplay();
     }
     function toggleMatch() {
         const btn = document.getElementById('btn-start');
         if(!matchActive) {
-            matchActive = true; btn.innerText = "Pause Match"; btn.style.backgroundColor = "#ffc107"; btn.style.color = "#000"; logEvent(`Match Clock Resumed at ${formatTime(matchSeconds)}`);
+            matchActive = true; btn.innerText = "Pause Match"; btn.style.backgroundColor = "#ffc107"; btn.style.color = "#000"; logEvent("Match Clock Resumed at " + formatTime(matchSeconds));
             clockInterval = setInterval(() => {
-                matchSeconds++; document.getElementById('match-clock').innerText = `Match Time: ${formatTime(matchSeconds)}`;
+                matchSeconds++; document.getElementById('match-clock').innerText = "Match Time: " + formatTime(matchSeconds);
                 if(matchSeconds % 60 === 0) { players.forEach(p => { if(p.position !== 'Bench') p.minutes++; }); renderRoster(); updatePitchDisplay(); }
             }, 1000);
-        } else { matchActive = false; btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; clearInterval(clockInterval); logEvent(`Match Clock Paused at ${formatTime(matchSeconds)}`); }
+        } else { matchActive = false; btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; clearInterval(clockInterval); logEvent("Match Clock Paused at " + formatTime(matchSeconds)); }
     }
     function stopMatch() {
         if(confirm("Stop match? This pauses the clock permanently. Export stats before resetting!")) {
             matchActive = false; clearInterval(clockInterval);
-            const btn = document.getElementById('btn-start'); btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; logEvent(`--- MATCH STOPPED PERMANENTLY at ${formatTime(matchSeconds)} ---`);
+            const btn = document.getElementById('btn-start'); btn.innerText = "Start Match"; btn.style.backgroundColor = "#28a745"; btn.style.color = "#fff"; logEvent("--- MATCH STOPPED PERMANENTLY at " + formatTime(matchSeconds) + " ---");
         }
     }
-    function formatTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
-    function logEvent(msg) { matchHistory.push(msg); const con = document.getElementById('log-container'); if(con) { const e = document.createElement('div'); e.className = "log-entry"; e.innerHTML = `<span class="log-time">[${formatTime(matchSeconds)}]</span> ${msg}`; con.insertBefore(e, con.firstChild); } }
+    function formatTime(s) { return Math.floor(s/60).toString().padStart(2,'0') + ":" + (s%60).toString().padStart(2,'0'); }
+    function logEvent(msg) { matchHistory.push(msg); const con = document.getElementById('log-container'); if(con) { const e = document.createElement('div'); e.className = "log-entry"; e.innerHTML = '<span class="log-time">[' + formatTime(matchSeconds) + ']</span> ' + msg; con.insertBefore(e, con.firstChild); } }
     function saveRosterTemplate() { localStorage.setItem('u11_roster_continuous_v4', JSON.stringify(players)); alert("Roster saved successfully!"); }
     function exportMatchLog() {
-        let out = `=== MATCH SUMMARY LOG & STATS REPORT ===\n\nFinal Score: OURS ${teamScore} - ${opponentScore} THEM\nDuration: ${formatTime(matchSeconds)}\n\n--- INDIVIDUAL METRICS ---\n`;
+        let out = "=== MATCH SUMMARY LOG & STATS REPORT ===\n\nFinal Score: OURS " + teamScore + " - " + opponentScore + " THEM\nDuration: " + formatTime(matchSeconds) + "\n\n--- INDIVIDUAL METRICS ---\n";
