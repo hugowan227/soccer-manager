@@ -58,8 +58,7 @@
         .field-modal button { display: block; width: 100%; margin: 4px 0; padding: 5px; font-size: 11px; }
     </style>
 </head>
-
-    <body>
+<body>
 <div class="container">
     <h1>U11 9v9 Match Lineup Tracker</h1>
     <div class="scoreboard">
@@ -199,6 +198,8 @@
         const b = new Blob([out], { type: 'text/plain' }), u = URL.createObjectURL(b), a = document.createElement('a');
         a.href = u; a.download = `match-report-${new Date().toISOString().slice(0,10)}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
     }
+    
+    document.getElementById('pitch-action-modal').addEventListener('click', function(e) { e.stopPropagation(); });
     document.addEventListener('click', function() { closeModal(); });
 </script>
 </body>
