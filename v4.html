@@ -107,7 +107,6 @@
     let matchActive = false, matchSeconds = 0, clockInterval = null, selectedPitchPosition = null, teamScore = 0, opponentScore = 0;
     let modalActivePosition = null;
     
-    // Fixed & Practical Sorting: Organized from Attacking Third down to Defending Third
     let players = [
         { id: 1, name: "Striker Joe", position: "FW", minutes: 0, goals: 0, fouls: 0 },
         { id: 5, name: "Player 5", position: "LM", minutes: 0, goals: 0, fouls: 0 },
@@ -137,7 +136,6 @@
         const pCon = document.getElementById('pitch-roster-container'), bCon = document.getElementById('bench-roster-container');
         pCon.innerHTML = ''; bCon.innerHTML = '';
         
-        // Custom sorting rule: Starters must strictly render in attacking-to-defending sequence on both systems
         const displayOrder = ['FW', 'LM', 'LCM', 'RCM', 'RM', 'LB', 'CD', 'RB', 'GK'];
         
         let activeStarters = players.filter(x => x.position !== 'Bench').sort((a, b) => displayOrder.indexOf(a.position) - displayOrder.indexOf(b.position));
@@ -153,6 +151,7 @@
         activeBenches.forEach(p => {
             const item = document.createElement('div');
             item.className = 'roster-item on-bench';
+            // Fixed: Purged the broken backslash escape character snippet from the makeSubstitution template call to restore rendering
             item.innerHTML = `<input type="text" value="${p.name}" onchange="updatePlayerName(${p.id}, this.value)"><span class="status-badge bench-status">Sub</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽${p.goals} 💥${p.fouls})</span><button class="action-icon-btn btn-goal" onclick="addGoal(${p.id})">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(${p.id})">💥</button><button style="padding:2px 4px; font-size:11px; background:#ef6c00; margin-left:4px;" onclick="makeSubstitution(${p.id})">Swap</button></div>`;
             bCon.appendChild(item);
         });
