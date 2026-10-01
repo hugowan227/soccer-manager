@@ -54,9 +54,12 @@
         .item-actions-wrapper { display: flex; align-items: center; gap: 2px; }
         .log-entry { font-size: 12px; padding: 5px 0; border-bottom: 1px dashed #eee; text-align: left; }
         .log-time { font-weight: bold; color: #555; margin-right: 4px; }
+        .field-modal { display: none; position: absolute; background: white; border: 2px solid #333; padding: 8px; border-radius: 5px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 120px; text-align: center; }
+        .field-modal button { display: block; width: 100%; margin: 4px 0; padding: 5px; font-size: 11px; }
     </style>
 </head>
-<body>
+
+    <body>
 <div class="container">
     <h1>U11 9v9 Match Lineup Tracker</h1>
     <div class="scoreboard">
@@ -72,16 +75,23 @@
         <button class="secondary" onclick="saveRosterTemplate()">Save Template</button>
     </div>
     <div class="pitch" id="soccer-pitch">
+        <div id="pitch-action-modal" class="field-modal">
+            <b id="modal-pos-title" style="font-size:12px; color:#111;">Position</b>
+            <button style="background-color:#4caf50;" onclick="triggerModalGoal()">⚽ Goal (+1)</button>
+            <button style="background-color:#f44336;" onclick="triggerModalFoul()">💥 Foul (+1)</button>
+            <button style="background-color:#ef6c00;" onclick="triggerModalSelectSub()">🔄 Select to Swap</button>
+            <button style="background-color:#6c757d;" onclick="closeModal()">Close</button>
+        </div>
         <div class="center-line"></div><div class="center-circle"></div><div class="penalty-area-top"></div><div class="penalty-area-bottom"></div>
-        <div class="player-slot" style="top: 15%; left: 50%;" onclick="handleSlotClick('FW')" id="slot-FW"><div class="jersey">FW</div><div class="player-name" id="name-FW">Empty</div><div class="player-stats-overlay" id="stats-FW">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 38%; left: 15%;" onclick="handleSlotClick('LM')" id="slot-LM"><div class="jersey">LM</div><div class="player-name" id="name-LM">Empty</div><div class="player-stats-overlay" id="stats-LM">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 40%; left: 38%;" onclick="handleSlotClick('LCM')" id="slot-LCM"><div class="jersey">LCM</div><div class="player-name" id="name-LCM">Empty</div><div class="player-stats-overlay" id="stats-LCM">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 40%; left: 62%;" onclick="handleSlotClick('RCM')" id="slot-RCM"><div class="jersey">RCM</div><div class="player-name" id="name-RCM">Empty</div><div class="player-stats-overlay" id="stats-RCM">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 38%; left: 85%;" onclick="handleSlotClick('RM')" id="slot-RM"><div class="jersey">RM</div><div class="player-name" id="name-RM">Empty</div><div class="player-stats-overlay" id="stats-RM">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 66%; left: 22%;" onclick="handleSlotClick('LB')" id="slot-LB"><div class="jersey">LB</div><div class="player-name" id="name-LB">Empty</div><div class="player-stats-overlay" id="stats-LB">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 68%; left: 50%;" onclick="handleSlotClick('CD')" id="slot-CD"><div class="jersey">CD</div><div class="player-name" id="name-CD">Empty</div><div class="player-stats-overlay" id="stats-CD">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 66%; left: 78%;" onclick="handleSlotClick('RB')" id="slot-RB"><div class="jersey">RB</div><div class="player-name" id="name-RB">Empty</div><div class="player-stats-overlay" id="stats-RB">0m | ⚽0 💥0</div></div>
-        <div class="player-slot" style="top: 86%; left: 50%;" onclick="handleSlotClick('GK')" id="slot-GK"><div class="jersey">GK</div><div class="player-name" id="name-GK">Empty</div><div class="player-stats-overlay" id="stats-GK">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 15%; left: 50%;" onclick="handleSlotClick('FW', event)" id="slot-FW"><div class="jersey">FW</div><div class="player-name" id="name-FW">Empty</div><div class="player-stats-overlay" id="stats-FW">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 38%; left: 15%;" onclick="handleSlotClick('LM', event)" id="slot-LM"><div class="jersey">LM</div><div class="player-name" id="name-LM">Empty</div><div class="player-stats-overlay" id="stats-LM">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 40%; left: 38%;" onclick="handleSlotClick('LCM', event)" id="slot-LCM"><div class="jersey">LCM</div><div class="player-name" id="name-LCM">Empty</div><div class="player-stats-overlay" id="stats-LCM">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 40%; left: 62%;" onclick="handleSlotClick('RCM', event)" id="slot-RCM"><div class="jersey">RCM</div><div class="player-name" id="name-RCM">Empty</div><div class="player-stats-overlay" id="stats-RCM">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 38%; left: 85%;" onclick="handleSlotClick('RM', event)" id="slot-RM"><div class="jersey">RM</div><div class="player-name" id="name-RM">Empty</div><div class="player-stats-overlay" id="stats-RM">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 66%; left: 22%;" onclick="handleSlotClick('LB', event)" id="slot-LB"><div class="jersey">LB</div><div class="player-name" id="name-LB">Empty</div><div class="player-stats-overlay" id="stats-LB">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 68%; left: 50%;" onclick="handleSlotClick('CD', event)" id="slot-CD"><div class="jersey">CD</div><div class="player-name" id="name-CD">Empty</div><div class="player-stats-overlay" id="stats-CD">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 66%; left: 78%;" onclick="handleSlotClick('RB', event)" id="slot-RB"><div class="jersey">RB</div><div class="player-name" id="name-RB">Empty</div><div class="player-stats-overlay" id="stats-RB">0m | ⚽0 💥0</div></div>
+        <div class="player-slot" style="top: 86%; left: 50%;" onclick="handleSlotClick('GK', event)" id="slot-GK"><div class="jersey">GK</div><div class="player-name" id="name-GK">Empty</div><div class="player-stats-overlay" id="stats-GK">0m | ⚽0 💥0</div></div>
     </div>
     <div class="workbench-layout">
         <div class="panel">
@@ -96,6 +106,7 @@
 </div>
 <script>
     let matchActive = false, matchSeconds = 0, clockInterval = null, selectedPitchPosition = null, teamScore = 0, opponentScore = 0;
+    let modalActivePosition = null;
     let players = [
         { id: 1, name: "Striker Joe", position: "FW", minutes: 0, goals: 0, fouls: 0 },
         { id: 2, name: "Player 2", position: "LB", minutes: 0, goals: 0, fouls: 0 },
@@ -125,7 +136,8 @@
         players.forEach(p => {
             const item = document.createElement('div'), isB = p.position === 'Bench';
             item.className = `roster-item ${isB ? 'on-bench' : 'active-on-pitch'}`;
-            item.innerHTML = `<input type="text" value="${p.name}" onchange="updatePlayerName(${p.id}, this.value)"><span class="status-badge ${isB ? 'bench-status' : 'pitch-status'}">${isB ? 'Sub' : p.position}</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽${p.goals} 💥${p.fouls})</span><button class="action-icon-btn btn-goal" onclick="addGoal(${p.id})">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(${p.id})">💥</button>${isB ? `<button style="padding:2px 4px; font-size:11px; background:#ef6c00; margin-left:4px;" onclick="makeSubstitution(\${p.id})">Swap</button>` : ''}</div>`;
+            let swapButton = isB ? `<button style="padding:2px 4px; font-size:11px; background:#ef6c00; margin-left:4px;" onclick="makeSubstitution(${p.id})">Swap</button>` : '';
+            item.innerHTML = `<input type="text" value="${p.name}" onchange="updatePlayerName(${p.id}, this.value)"><span class="status-badge ${isB ? 'bench-status' : 'pitch-status'}">${isB ? 'Sub' : p.position}</span><div class="item-actions-wrapper"><span style="font-size:11px; margin-right:4px; color:#555;">(⚽${p.goals} 💥${p.fouls})</span><button class="action-icon-btn btn-goal" onclick="addGoal(${p.id})">⚽</button><button class="action-icon-btn btn-foul" onclick="addFoul(${p.id})">💥</button>${swapButton}</div>`;
             if (isB) bCon.appendChild(item); else pCon.appendChild(item);
         });
     }
@@ -136,19 +148,24 @@
             else if (nEl && sEl) { nEl.innerText = "Empty"; sEl.innerText = "0m | ⚽0 💥0"; }
         });
     }
-    function addGoal(pId) {
-        const p = players.find(x => x.id === pId);
-        if(p) { p.goals++; teamScore++; updateScoreboard(); logEvent(`⚽ GOAL! Scored by ${p.name} (${p.position==='Bench'?'Sub':p.position}). Score: OURS ${teamScore}-${opponentScore} THEM`); renderRoster(); updatePitchDisplay(); }
+    function handleSlotClick(pos, event) {
+        event.stopPropagation(); modalActivePosition = pos; const player = players.find(x => x.position === pos);
+        document.getElementById('modal-pos-title').innerText = player ? player.name : pos;
+        const modal = document.getElementById('pitch-action-modal'), pitch = document.getElementById('soccer-pitch'), rect = pitch.getBoundingClientRect();
+        let clickX = event.clientX - rect.left, clickY = event.clientY - rect.top;
+        if (clickX > rect.width - 140) clickX = rect.width - 140; if (clickY > rect.height - 150) clickY = rect.height - 150;
+        modal.style.left = clickX + 'px'; modal.style.top = clickY + 'px'; modal.style.display = 'block';
     }
-    function addFoul(pId) {
-        const p = players.find(x => x.id === pId);
-        if(p) { p.fouls++; logEvent(`💥 FOUL committed by ${p.name} (${p.position==='Bench'?'Sub':p.position})`); renderRoster(); updatePitchDisplay(); }
-    }
+    function closeModal() { document.getElementById('pitch-action-modal').style.display = 'none'; }
+    function triggerModalGoal() { if(!modalActivePosition) return; const p = players.find(x => x.position === modalActivePosition); if(p) addGoal(p.id); closeModal(); }
+    function triggerModalFoul() { if(!modalActivePosition) return; const p = players.find(x => x.position === modalActivePosition); if(p) addFoul(p.id); closeModal(); }
+    function triggerModalSelectSub() { if(!modalActivePosition) return; document.querySelectorAll('.player-slot').forEach(el => el.classList.remove('selected')); selectedPitchPosition = modalActivePosition; const sel = document.getElementById(`slot-${modalActivePosition}`); if(sel) sel.classList.add('selected'); closeModal(); }
+    function addGoal(pId) { const p = players.find(x => x.id === pId); if(p) { p.goals++; teamScore++; updateScoreboard(); logEvent(`⚽ GOAL! Scored by ${p.name} (${p.position==='Bench'?'Sub':p.position}). Score: OURS ${teamScore}-${opponentScore} THEM`); renderRoster(); updatePitchDisplay(); } }
+    function addFoul(pId) { const p = players.find(x => x.id === pId); if(p) { p.fouls++; logEvent(`💥 FOUL committed by ${p.name} (${p.position==='Bench'?'Sub':p.position})`); renderRoster(); updatePitchDisplay(); } }
     function logOpponentGoal() { opponentScore++; updateScoreboard(); logEvent(`⚠️ OPPONENT GOAL! Score: OURS ${teamScore} - ${opponentScore} THEM`); }
     function updatePlayerName(id, newName) { const p = players.find(x => x.id === id); if(p) { const old = p.name; p.name = newName; logEvent(`Renamed ${old} to ${newName}`); updatePitchDisplay(); } }
-    function handleSlotClick(pos) { document.querySelectorAll('.player-slot').forEach(el => el.classList.remove('selected')); selectedPitchPosition = pos; document.getElementById(`slot-${pos}`).classList.add('selected'); }
     function makeSubstitution(bId) {
-        if(!selectedPitchPosition) { alert("Please tap a position node on the green pitch diagram first!"); return; }
+        if(!selectedPitchPosition) { alert("Please tap a position node on the field diagram first, and click 'Select to Swap' inside the pop-up toolbar!"); return; }
         const bp = players.find(x => x.id === bId), pp = players.find(x => x.position === selectedPitchPosition), tStr = formatTime(matchSeconds);
         if(pp) { logEvent(`[SUB] ${tStr} - ${bp.name} replaces ${pp.name} at ${selectedPitchPosition}`); pp.position = "Bench"; }
         else { logEvent(`[SUB] ${tStr} - ${bp.name} takes empty slot at ${selectedPitchPosition}`); }
@@ -182,6 +199,7 @@
         const b = new Blob([out], { type: 'text/plain' }), u = URL.createObjectURL(b), a = document.createElement('a');
         a.href = u; a.download = `match-report-${new Date().toISOString().slice(0,10)}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
     }
+    document.addEventListener('click', function() { closeModal(); });
 </script>
 </body>
 </html>
