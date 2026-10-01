@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U11 9v9 Soccer Lineup & Match Dashboard (3-4-1)</title>
+    <style>
+        :root {
+            --pitch-green: #2e7d32;
+            --pitch-lines: #ffffff;
+            --player-bg: #1565c0;
+            --bench-bg: #ef6c00;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin: 2px 0 8px 0;
+        }
+        h1 { font-size: 24px; margin-bottom: 2px; }
+        h2 { font-size: 16px; color: #555; }
+        
+        .scoreboard {
+            background-color: #212121;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 320px;
+            margin: 0 auto 12px auto;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .scoreboard-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            margin-bottom: 2px;
+        }
+        .scoreboard-display {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #ffeb3b;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        button.stop { background-color: #dc3545; }
+        button.stop:hover { background-color: #bd2130; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+        button.action-btn { background-color: #28a745; }
+        button.action-btn:hover { background-color: #218838; }
+        
+        .action-icon-btn {
+            padding: 4px 6px;
+            font-size: 11px;
+            border-radius: 3px;
+            margin-left: 3px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        button.btn-goal { background-color: #4caf50; }
+        button.btn-goal:hover { background-color: #388e3c; }
+        button.btn-foul { background-color: #f44336; }
+        button.btn-foul:hover { background-color: #d32f2f; }
+
+        .pitch {
+            background-color: var(--pitch-green);
+            width: 100%;
+            height: 460px;
+            border-radius: 10px;
+            position: relative;
+            border: 4px solid var(--pitch-lines);
+            box-sizing: border-box;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .center-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--pitch-lines);
+        }
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 90px;
+            height: 90px;
+            border: 2px solid var(--pitch-lines);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .penalty-area-top {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 180px;
+            height: 70px;
+            border: 2px solid var(--pitch-lines);
+            border-top: none;
+            transform: translateX(-50%);
+        }
+        .penalty-area-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 180px;
+            height: 70px;
+            border: 2px solid var(--pitch-lines);
+            border-bottom: none;
+            transform: translateX(-50%);
+        }
+
+        .player-slot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 85px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .jersey {
+            width: 38px;
+            height: 38px;
+            background-color: var(--player-bg);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .player-slot:hover .jersey { transform: scale(1.1); }
+        .player-slot.selected .jersey {
+            background-color: #ffeb3b;
+            color: black;
+            border-color: black;
+        }
+        .player-name {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 11px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-top: 3px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .player-stats-overlay {
+            font-size: 10px;
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px black;
+        }
+
+        .workbench-layout {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .squad-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 768px) {
+            .workbench-layout { grid-template-columns: 1fr; }
+            .squad-columns { grid-template-columns: 1fr; }
+            .pitch { height: 420px; }
+        }
+        .panel {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            max-height: 520px;
+            overflow-y: auto;
+        }
+        .panel h2 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 4px;
+        }
+
+        .roster-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .roster-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #6c757d;
+        }
+        .roster-item.active-on-pitch { border-left-color: var(--player-bg); }
+        .roster-item.on-bench { border-left-color: var(--bench-bg); }
+        
+        .roster-item input {
+            border: 1px solid #ccc;
+            padding: 3px;
+            border-radius: 3px;
+            font-size: 12px;
+            width: 90px;
+        }
+        .roster-item .status-badge {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 4px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            min-width: 32px;
+            text-align: center;
+        }
+        .status-badge.pitch-status { background: #e3f2fd; color: #0d47a1; }
+        .status-badge.bench-status { background: #fff3e0; color: #e65100; }
+
+        .log-entry {
+            font-size: 12px;
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .log-time { font-weight: bold; color: #555; margin-right: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>U11 9v9 Match Lineup Tracker</h1>
+    
+    <div class="scoreboard">
+        <div class="scoreboard-title">Live Scoreboard</div>
+        <div class="scoreboard-display" id="live-score-text">OURS 0 - 0 THEM</div>
+    </div>
+
+    <h2 id="match-period" style="text-align:center;">First Half</h2>
+    <h3 id="match-clock" style="text-align:center; margin-bottom:12px;">Match Time: 00:00</h3>
+
+    <div class="controls">
+        <button id="btn-start" onclick="toggleMatch()">Start Match</button>
+        <button id="btn-period-action" class="action-btn" style="display: none;" onclick="handlePeriodTransition()">End First Half</button>
+        <button class="secondary" onclick="logOpponentGoal()">Opponent Scored +1</button>
+        <button class="secondary" onclick="exportMatchLog()">Export Log & Stats</button>
+        <button class="secondary" onclick="saveRosterTemplate()">Save Template</button>
+    </div>
+
+    <!-- 3-4-1 Pitch Diagram -->
+    <div class="pitch" id="soccer-pitch">
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div class="penalty-area-top"></div>
+        <div class="penalty-area-bottom"></div>
+        
+        <!-- Striker -->
+        <div class="player-slot" style="top: 15%; left: 50%;" onclick="handleSlotClick('FW')" id="slot-FW">
+            <div class="jersey">FW</div>
+            <div class="player-name" id="name-FW">Empty</div>
+            <div class="player-stats-overlay" id="stats-FW">0m | ⚽0</div>
+        </div>
+
+        <!-- Midfield (4) -->
+        <div class="player-slot" style="top: 38%; left: 15%;" onclick="handleSlotClick('LM')" id="slot-LM">
+            <div class="jersey">LM</div>
